@@ -1,433 +1,50 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle de Estoque</title>
-
-<style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f4f6f9;
-    color: #2c3e50;
-}
-
-.container {
-    max-width: 1150px;
-    margin: 30px auto;
-    background: white;
-    padding: 22px;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-}
-
-.topo {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-h1 {
-    margin: 0;
-    font-size: 26px;
-}
-
-.botoes {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.botoes a {
-    display: inline-block;
-    padding: 8px 11px;
-    background-color: #2c7be5;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 13px;
-}
-
-.botoes a:hover {
-    background-color: #1a5fc2;
-}
-
-.sair {
-    background-color: #6c757d !important;
-}
-
-.sair:hover {
-    background-color: #5a6268 !important;
-}
-
-/* Correção 5: min-width reduzido para melhor experiência mobile */
-.titulo-categoria {
-    margin-top: 18px;
-    margin-bottom: 5px;
-    padding: 7px 10px;
-    background-color: #e9f1fb;
-    color: #1f3b57;
-    border-left: 5px solid #2c7be5;
-    border-radius: 6px;
-    font-size: 16px;
-    text-transform: uppercase;
-}
-
-.tabela-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    margin-bottom: 18px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 680px;
-}
-
-th {
-    background-color: #2c3e50;
-    color: white;
-    padding: 8px 9px;
-    text-align: left;
-    font-size: 12px;
-}
-
-td {
-    padding: 6px 8px;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 12px;
-    vertical-align: middle;
-}
-
-th:nth-child(1), td:nth-child(1) { width: 34%; }
-th:nth-child(2), td:nth-child(2) { width: 17%; }
-th:nth-child(3), td:nth-child(3) { width: 16%; }
-th:nth-child(4), td:nth-child(4) { width: 28%; }
-
-/* Correção 4: coluna Obs. com largura fixa adequada */
-th:nth-child(5), td:nth-child(5) {
-    width: 60px;
-    text-align: center;
-}
-
-td:first-child {
-    font-size: 13px;
-    font-weight: bold;
-}
-
-tr:hover {
-    background-color: #f1f5f9;
-}
-
-.status {
-    font-weight: bold;
-    padding: 4px 8px;
-    border-radius: 5px;
-    display: inline-block;
-    font-size: 11px;
-}
-
-.ok       { background: #d4edda; color: #155724; }
-.atencao  { background: #fff3cd; color: #856404; }
-.acabado  { background: #f8d7da; color: #721c24; }
-
-.acoes {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-wrap: wrap;
-}
-
-.acao,
-.btn-excluir {
-    padding: 5px 7px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: white;
-    font-size: 11px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.editar           { background-color: #17a2b8; }
-.editar:hover     { background-color: #138496; }
-.entrada          { background-color: #28a745; }
-.entrada:hover    { background-color: #218838; }
-.saida            { background-color: #f59e0b; }
-.saida:hover      { background-color: #d97706; }
-.btn-excluir      { background: #ef4444; }
-.btn-excluir:hover{ background: #b91c1c; }
-
-/* ---- Balão de observação ---- */
-.coluna-estrela {
-    text-align: center;
-    width: 60px;
-}
-
-.estrela-container {
-    position: relative;
-    display: inline-block;
-}
-
-.botao-estrela {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 17px;
-    padding: 3px;
-}
-
-.botao-estrela:hover {
-    transform: scale(1.1);
-}
-
-.balao-observacao {
-    visibility: hidden;
-    opacity: 0;
-    width: 250px;
-    background-color: #1f2937;
-    color: white;
-    text-align: left;
-    padding: 10px;
-    border-radius: 8px;
-    position: absolute;
-    z-index: 20;
-    right: 0;
-    font-size: 12px;
-    line-height: 1.4;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    transition: opacity 0.2s ease;
-    white-space: normal;
-    pointer-events: none;
-}
-
-/* Correção 2: balão abre para BAIXO por padrão */
-.balao-observacao {
-    top: 30px;
-}
-
-.balao-observacao::before {
-    content: "";
-    position: absolute;
-    top: -7px;
-    right: 8px;
-    border-width: 0 7px 7px 7px;
-    border-style: solid;
-    border-color: transparent transparent #1f2937 transparent;
-}
-
-/* Correção 2: classe .balao-cima faz o balão abrir para CIMA */
-.balao-observacao.balao-cima {
-    top: auto;
-    bottom: 30px;
-}
-
-.balao-observacao.balao-cima::before {
-    top: auto;
-    bottom: -7px;
-    border-width: 7px 7px 0 7px;
-    border-color: #1f2937 transparent transparent transparent;
-}
-
-.estrela-container:hover .balao-observacao,
-.estrela-container:focus-within .balao-observacao,
-.estrela-container.aberto .balao-observacao {
-    visibility: visible;
-    opacity: 1;
-}
-
-.mensagem-vazia {
-    padding: 18px;
-    background-color: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    border-radius: 8px;
-    color: #64748b;
-    margin-top: 20px;
-}
-
-@media (max-width: 700px) {
-    .container {
-        margin: 12px;
-        padding: 14px;
-    }
-
-    h1 { font-size: 20px; }
-
-    .botoes a {
-        font-size: 12px;
-        padding: 7px 9px;
-    }
-}
-</style>
-
+    <title>Meus sites favoritos</title>
 </head>
+
 <body>
 
-<div class="container">
+    <h1>Meus sites favoritos: Carlos Gomes de Oliveira</h1>
 
-    <div class="topo">
-        <h1>📦 Controle de Estoque</h1>
+    <!-- SITE 1 -->
+    <h2>Igreja Getsêmani</h2>
+    <img src="imagens/iegetsemani.png" width="300">
+    <br>
+    <a href="https://iegetsemani.com" target="_blank">Acessar site</a>
 
-        <div class="botoes">
-            <a href="/adicionar">➕ Cadastrar produto</a>
-            <a href="/historico">📊 Ver histórico</a>
-            <a href="/alertas">⚠️ Alertas</a>
-            {# Correção 6: title informativo no botão de backup #}
-            <a href="/backup" title="Faz o download do arquivo de backup do banco de dados">💾 Backup</a>
-            <a href="/logout" class="sair">🚪 Sair</a>
-        </div>
-    </div>
+    <hr>
 
-    {% set total_produtos = namespace(valor=0) %}
-    {% for categoria, produtos in produtos_por_categoria.items() %}
-        {% set total_produtos.valor = total_produtos.valor + produtos|length %}
-    {% endfor %}
+    <!-- SITE 2 -->
+    <h2>Revista Mundo Estranho</h2>
+    <img src="imagens/mundo-estranho.png" width="300">
+    <br>
+    <a href="https://super.abril.com.br/mundo-estranho" target="_blank">Acessar site</a>
 
-    {% if total_produtos.valor == 0 %}
+    <hr>
 
-        <div class="mensagem-vazia">
-            Nenhum produto cadastrado ainda. Clique em <strong>Cadastrar produto</strong> para começar.
-        </div>
+    <!-- SITE 3 -->
+    <h2>Site TecMundo</h2>
+    <img src="imagens/tecmundo.png" width="300">
+    <br>
+    <a href="https://www.tecmundo.com.br" target="_blank">Acessar site</a>
 
-    {% else %}
+    <hr>
 
-        {% for categoria, produtos in produtos_por_categoria.items() %}
+    <!-- SITE 4 -->
+    <h2>Khan Academy</h2>
+    <img src="imagens/khanacademy.png" width="300">
+    <br>
+    <a href="https://pt.khanacademy.org" target="_blank">Acessar site</a>
 
-            {% if produtos|length > 0 %}
+    <hr>
 
-                {# Correção 7: aria-label na região para acessibilidade #}
-                <section role="region" aria-label="{{ categoria }}">
-
-                    <h2 class="titulo-categoria">{{ categoria }}</h2>
-
-                    <div class="tabela-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Quantidade</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                    <th title="Observação">Obs.</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {% for item in produtos %}
-                                <tr>
-                                    <td>{{ item.nome }}</td>
-
-                                    <td>
-                                        {{ "%.1f"|format(item.quantidade) }} {{ item.unidade }}
-                                    </td>
-
-                                    <td>
-                                        {% if item.status == "ADEQUADO" %}
-                                            <span class="status ok">ADEQUADO</span>
-                                        {% elif item.status == "ATENÇÃO" %}
-                                            <span class="status atencao">ATENÇÃO</span>
-                                        {% else %}
-                                            <span class="status acabado">EM FALTA</span>
-                                        {% endif %}
-                                    </td>
-
-                                    <td>
-                                        <div class="acoes">
-                                            <a class="acao editar" href="/editar/{{ item.id }}">✏️ Editar</a>
-                                            <a class="acao entrada" href="/entrada/{{ item.id }}">Entrada</a>
-                                            <a class="acao saida" href="/saida/{{ item.id }}">Saída</a>
-
-                                            {# Correção 1: botão Excluir visível somente para admins #}
-                                            {% if session.perfil == 'admin' %}
-                                            <form
-                                                action="/excluir/{{ item.id }}"
-                                                method="POST"
-                                                style="display:inline;"
-                                                onsubmit="return confirm('Deseja realmente excluir {{ item.nome }}? Esta ação não pode ser desfeita.');">
-                                                <button type="submit" class="btn-excluir">
-                                                    🗑 Excluir
-                                                </button>
-                                            </form>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-
-                                    <td class="coluna-estrela">
-                                        {% if item.tem_observacao %}
-                                            {# Correção 2: balão abre para cima nos últimos 3 itens da tabela #}
-                                            {% set abre_cima = loop.revindex <= 3 %}
-                                            <span class="estrela-container">
-                                                <button
-                                                    type="button"
-                                                    class="botao-estrela"
-                                                    title="Ver observação"
-                                                    aria-label="Ver observação do produto {{ item.nome }}"
-                                                    aria-expanded="false">
-                                                    ⭐
-                                                </button>
-
-                                                <span class="balao-observacao {% if abre_cima %}balao-cima{% endif %}">
-                                                    {{ item.observacao_produto or "Observação registrada no histórico de movimentações." }}
-                                                </span>
-                                            </span>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                </section>
-
-            {% endif %}
-
-        {% endfor %}
-
-    {% endif %}
-
-</div>
-
-{# Correção 3: fecha balão de observação ao pressionar Escape #}
-<script>
-document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-        document.querySelectorAll(".estrela-container.aberto").forEach(function (el) {
-            el.classList.remove("aberto");
-            var btn = el.querySelector(".botao-estrela");
-            if (btn) btn.setAttribute("aria-expanded", "false");
-        });
-    }
-});
-
-// Toque em mobile: abre/fecha o balão com clique no botão estrela
-document.querySelectorAll(".botao-estrela").forEach(function (btn) {
-    btn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        var container = btn.closest(".estrela-container");
-        var aberto = container.classList.toggle("aberto");
-        btn.setAttribute("aria-expanded", aberto ? "true" : "false");
-    });
-});
-
-// Clique fora fecha todos os balões abertos
-document.addEventListener("click", function () {
-    document.querySelectorAll(".estrela-container.aberto").forEach(function (el) {
-        el.classList.remove("aberto");
-        var btn = el.querySelector(".botao-estrela");
-        if (btn) btn.setAttribute("aria-expanded", "false");
-    });
-});
-</script>
+    <!-- SITE 5 -->
+    <h2>Dicas de Cinema</h2>
+    <img src="imagens/dicasdecinema.png" width="300">
+    <br>
+    <a href="https://dicasdecinema.net" target="_blank">Acessar site</a>
 
 </body>
 </html>
